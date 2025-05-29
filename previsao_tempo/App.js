@@ -1,16 +1,41 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useState, useEffect} from 'react';
 import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import api from './services/api';
+import { TextInput } from 'react-native-web';
+import { Input } from 'react-native-elements';
 
 export default function App() {
 
-  const [weather, setWeather] = useState(null);
+  const [weather, setWeather] = useState(null); //para armazenar dados do tempo
+  const [cidade, setCidade] = useState(null);
 
+  useEffect(() => {
+    const fetchWeather = async () => {
+      try {
+        const response = await api.get('/weather', {
+          params: {
+            key: '9149fe5e',
+            city_name: cidade,
+            format: 'json'
+          }
+        });
+        setWeather(response.data.results);
+      } catch(error) {
+          console.error('Erro ao buscar clima:', error);
+      }
+    };
+
+    fetchWeather();
+
+  }, [cidade]);
   
 
   return (
       <View style={styles.container}>
         <ScrollView>
+          <Input value={cidade} onChangeText={setCidade} placeholder='Digite aqui a cidade' placeholderTextColor="white"
+          containerStyle={styles.input}></Input>
           <View style={styles.cartao}>
             <Text>Teste</Text>
           </View>
@@ -24,8 +49,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#2196F3',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 
   cartao: {
@@ -40,5 +63,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 4
+  },
+
+  input: {
+    alignSelf: 'flex-start',
+    width: '30%',
+    borderRadius: '10%',
+    marginBottom: 20,
+    color: 'rgb(0,0,0)'
   }
 });
