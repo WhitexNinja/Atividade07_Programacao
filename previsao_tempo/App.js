@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useState, useEffect} from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, Button } from 'react-native';
 import api from './services/api';
 import { TextInput } from 'react-native-web';
 import { Input } from 'react-native-elements';
@@ -8,10 +8,16 @@ import { Input } from 'react-native-elements';
 export default function App() {
 
   const [weather, setWeather] = useState(null); //para armazenar dados do tempo
-  const [cidade, setCidade] = useState(null);
+  const [cidade, setCidade] = useState('');
 
   useEffect(() => {
+    console.log("CIdade atual:", cidade)
+
     const fetchWeather = async () => {
+      if (!cidade.trim()) {
+        setWeather(null);
+        return;
+      }
       try {
         const response = await api.get('/weather', {
           params: {
@@ -20,6 +26,7 @@ export default function App() {
             format: 'json'
           }
         });
+        console.log('Resposta da API:', response.data); // debug
         setWeather(response.data.results);
       } catch(error) {
           console.error('Erro ao buscar clima:', error);
@@ -33,11 +40,21 @@ export default function App() {
 
   return (
       <View style={styles.container}>
-        <ScrollView>
-          <Input value={cidade} onChangeText={setCidade} placeholder='Digite aqui a cidade' placeholderTextColor="white"
-          containerStyle={styles.input}></Input>
+        <ScrollView contentContainerStyle={styles.scroll}>
+          <View>
+            <Input value={cidade} onChangeText={setCidade} placeholder='Digite aqui a cidade' placeholderTextColor="white"
+            containerStyle={styles.input}></Input>
+          </View>
           <View style={styles.cartao}>
-            <Text>Teste</Text>
+            {weather ? (
+              <>
+                <Text>Cidade: {weather.city}</Text>
+                <Text>Temperatura: {weather.temp}°C</Text>
+                <Text>Descrição: {weather.description}</Text>
+              </>
+            ) : (
+              <Text style={styles.text}>Digite uma cidade para ver o clima.</Text>
+            )}
           </View>
           <StatusBar style="auto" />
         </ScrollView>
@@ -51,6 +68,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#2196F3',
   },
 
+  scroll: {
+    paddingTop: 60,
+  },
+
   cartao: {
     backgroundColor: 'rgba(255, 255, 255, 0.25)',
     borderRadius: 16,
@@ -60,16 +81,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     elevation: 6, // sombra Android
     shadowColor: '#000', // sombra iOS
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4
   },
 
   input: {
     alignSelf: 'flex-start',
-    width: '80',
-    borderRadius: '',
+    width: 300,
+    height: 50,
     marginBottom: 20,
-    color: 'black'
-  }
+    backgroundColor: 'white',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+  },
+
+  text: {
+    color: 'white',
+    fontSize: 16,
+    marginVertical: 4,
+  },
 });
