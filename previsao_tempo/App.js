@@ -67,9 +67,9 @@ const styles = StyleSheet.create({
 
   input: {
     alignSelf: 'flex-start',
-    width: '30%',
-    borderRadius: '10%',
+    width: '80',
+    borderRadius: '',
     marginBottom: 20,
-    color: 'rgb(0,0,0)'
+    color: 'black'
   }
 });
