@@ -45,7 +45,8 @@ export default function App() {
                 <Text>Temperatura: {weather.temp}°C</Text>
                 <Text>Descrição: {weather.description}</Text>
                 <Text>Precipitação: {weather.rain}%</Text>
-                <Text>Umidade: {weather.humidity}</Text>
+                <Text>Umidade: {weather.humidity}%</Text>
+                <Text>Velocidade do Vento: {weather.wind_speedy}</Text>
               </>
             ) : (
               <Text style={styles.text}>Digite uma cidade para ver o clima.</Text>
@@ -66,6 +67,14 @@ export default function App() {
 
           <View style={styles.cartao}>
             <Text>Next Forecast</Text>
+            {weather && (
+              <>
+                <Text>{weather.forecast[0].date}</Text><Text>-</Text> 
+                <Text>{weather.forecast[0].weekday}</Text>
+                <Text>{weather.sunset}</Text>
+                <Text>{weather.forecast[1].date}</Text>
+              </>
+            )}
           </View>
           <StatusBar style="auto" />
         </ScrollView>
