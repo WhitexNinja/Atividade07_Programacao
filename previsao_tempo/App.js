@@ -1,17 +1,14 @@
 import { StatusBar } from 'expo-status-bar';
 import React, {useState, useEffect} from 'react';
-import { StyleSheet, Text, View, ScrollView, Button } from 'react-native';
+import { StyleSheet, Text, View, ScrollView } from 'react-native';
 import api from './services/api';
 import { TextInput } from 'react-native-web';
-import { Input } from 'react-native-elements';
+import { Button, Input } from 'react-native-elements';
 
 export default function App() {
 
   const [weather, setWeather] = useState(null); //para armazenar dados do tempo
   const [cidade, setCidade] = useState('');
-
-  useEffect(() => {
-    console.log("CIdade atual:", cidade)
 
     const fetchWeather = async () => {
       if (!cidade.trim()) {
@@ -31,12 +28,7 @@ export default function App() {
       } catch(error) {
           console.error('Erro ao buscar clima:', error);
       }
-    };
-
-    fetchWeather();
-
-  }, [cidade]);
-  
+    };  
 
   return (
       <View style={styles.container}>
@@ -44,6 +36,7 @@ export default function App() {
           <View>
             <Input value={cidade} onChangeText={setCidade} placeholder='Digite aqui a cidade' placeholderTextColor="white"
             containerStyle={styles.input}></Input>
+            <Button title="Buscar Clima" onPress={fetchWeather} buttonStyle={styles.button} containerStyle={styles.buttonContainer} />
           </View>
           <View style={styles.cartao}>
             {weather ? (
@@ -51,10 +44,28 @@ export default function App() {
                 <Text>Cidade: {weather.city}</Text>
                 <Text>Temperatura: {weather.temp}°C</Text>
                 <Text>Descrição: {weather.description}</Text>
+                <Text>Precipitação: {weather.rain}%</Text>
+                <Text>Umidade: {weather.humidity}</Text>
               </>
             ) : (
               <Text style={styles.text}>Digite uma cidade para ver o clima.</Text>
             )}
+          </View>
+
+          <View style={styles.cartao}>
+            {weather ? (
+              <>
+                <Text>Nascer do Sol: {weather.sunrise}</Text>
+                <Text>Por do Sol: {weather.sunset}</Text>
+
+              </>
+            ) : (
+              <Text style={styles.text}>Digite uma cidade para ver o clima.</Text>
+            )}
+          </View>
+
+          <View style={styles.cartao}>
+            <Text>Next Forecast</Text>
           </View>
           <StatusBar style="auto" />
         </ScrollView>
@@ -63,6 +74,7 @@ export default function App() {
 }
 
 const styles = StyleSheet.create({
+
   container: {
     flex: 1,
     backgroundColor: '#2196F3',
@@ -73,17 +85,17 @@ const styles = StyleSheet.create({
   },
 
   cartao: {
-    backgroundColor: 'rgba(255, 255, 255, 0.25)',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: 16,
     width: '90%',
     padding: 24,
     marginVertical: 12,
     alignItems: 'center',
-    elevation: 6, // sombra Android
+    elevation: 0, // sombra Android
     shadowColor: '#000', // sombra iOS
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2
   },
 
   input: {
@@ -91,7 +103,7 @@ const styles = StyleSheet.create({
     width: 300,
     height: 50,
     marginBottom: 20,
-    backgroundColor: 'white',
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
     borderRadius: 12,
     paddingHorizontal: 10,
   },
@@ -101,4 +113,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginVertical: 4,
   },
+
+  button: {
+    backgroundColor: '#0D47A1',
+    borderRadius: 25,
+    height: 50,
+    width: 300,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+
+  buttonContainer: {
+    width: '90%',
+    alignSelf: 'center',
+    marginBottom: 20,
+  }
 });
