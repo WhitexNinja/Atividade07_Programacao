@@ -1,146 +1,179 @@
 import { StatusBar } from 'expo-status-bar';
-import React, {useState, useEffect} from 'react';
-import { StyleSheet, Text, View, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, ScrollView, Image } from 'react-native';
 import api from './services/api';
-import { TextInput } from 'react-native-web';
-import { Button, Input } from 'react-native-elements';
+import { Input, Button } from 'react-native-elements';
 
 export default function App() {
-
-  const [weather, setWeather] = useState(null); //para armazenar dados do tempo
+  const [weather, setWeather] = useState(null);
   const [cidade, setCidade] = useState('');
 
-    const fetchWeather = async () => {
-      if (!cidade.trim()) {
-        setWeather(null);
-        return;
-      }
-      try {
-        const response = await api.get('/weather', {
-          params: {
-            key: '9149fe5e',
-            city_name: cidade,
-            format: 'json'
-          }
-        });
-        console.log('Resposta da API:', response.data); // debug
-        setWeather(response.data.results);
-      } catch(error) {
-          console.error('Erro ao buscar clima:', error);
-      }
-    };  
+  const fetchWeather = async () => {
+    if (!cidade.trim()) {
+      setWeather(null);
+      return;
+    }
+    try {
+      const response = await api.get('/weather', {
+        params: {
+          key: '9149fe5e',
+          city_name: cidade,
+          format: 'json'
+        }
+      });
+      setWeather(response.data.results);
+    } catch (error) {
+      console.error('Erro ao buscar clima:', error);
+    }
+  };
 
   return (
-      <View style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scroll}>
-          <View>
-            <Input value={cidade} onChangeText={setCidade} placeholder='Digite aqui a cidade' placeholderTextColor="white"
-            containerStyle={styles.input}></Input>
-            <Button title="Buscar Clima" onPress={fetchWeather} buttonStyle={styles.button} containerStyle={styles.buttonContainer} />
-          </View>
-          <View style={styles.cartao}>
-            {weather ? (
-              <>
-                <Text>Cidade: {weather.city}</Text>
-                <Text>Temperatura: {weather.temp}°C</Text>
-                <Text>Descrição: {weather.description}</Text>
-                <Text>Precipitação: {weather.rain}%</Text>
-                <Text>Umidade: {weather.humidity}%</Text>
-                <Text>Velocidade do Vento: {weather.wind_speedy}</Text>
-              </>
-            ) : (
-              <Text style={styles.text}>Digite uma cidade para ver o clima.</Text>
-            )}
-          </View>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scroll}>
+        {/* INPUT */}
+        <Input
+          value={cidade}
+          onChangeText={setCidade}
+          placeholder="Digite a cidade"
+          placeholderTextColor="#fff"
+          inputStyle={{ color: '#fff' }}
+          containerStyle={styles.input}
+        />
+        <Button
+          title="Buscar Clima"
+          onPress={fetchWeather}
+          buttonStyle={styles.button}
+          containerStyle={styles.buttonContainer}
+        />
 
-          <View style={styles.cartao}>
-            {weather ? (
-              <>
-                <Text>Nascer do Sol: {weather.sunrise}</Text>
-                <Text>Por do Sol: {weather.sunset}</Text>
+        {/* DADOS DO CLIMA */}
+        {weather && (
+          <View style={styles.weatherContainer}>
+            <Text style={styles.city}>{weather.city}</Text>
+            <Text style={styles.temp}>{weather.temp}°</Text>
+            <Text style={styles.desc}>{weather.description}</Text>
 
-              </>
-            ) : (
-              <Text style={styles.text}>Digite uma cidade para ver o clima.</Text>
-            )}
-          </View>
+            {/* INFORMAÇÕES EXTRAS */}
+            <View style={styles.infoBox}>
+              <Text style={styles.infoText}>🌧 {weather.rain}%</Text>
+              <Text style={styles.infoText}>💧 {weather.humidity}%</Text>
+              <Text style={styles.infoText}>🌬 {weather.wind_speedy}</Text>
+            </View>
 
-          <View style={styles.cartao}>
-            <Text>Next Forecast</Text>
-            {weather && (
-              <>
-                <Text>{weather.forecast[0].date}</Text><Text>-</Text> 
-                <Text>{weather.forecast[0].weekday}</Text>
-                <Text>{weather.sunset}</Text>
-                <Text>{weather.forecast[1].date}</Text>
-              </>
-            )}
+            {/* PREVISÃO PARA HOJE */}
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>Hoje</Text>
+              <Text style={styles.cardText}>🌅 {weather.sunrise}</Text>
+              <Text style={styles.cardText}>🌇 {weather.sunset}</Text>
+            </View>
+
+            {/* PRÓXIMOS DIAS */}
+            <View style={styles.card}>
+              <Text style={styles.sectionTitle}>Next Forecast</Text>
+              <View style={styles.forecastItem}>
+                <Text style={styles.day}>{weather.forecast[0].weekday}</Text>
+                <Text style={styles.cardText}>{weather.forecast[0].max}° / {weather.forecast[0].min}°</Text>
+              </View>
+              <View style={styles.forecastItem}>
+                <Text style={styles.day}>{weather.forecast[1].weekday}</Text>
+                <Text style={styles.cardText}>{weather.forecast[1].max}° / {weather.forecast[1].min}°</Text>
+              </View>
+            </View>
           </View>
-          <StatusBar style="auto" />
-        </ScrollView>
-      </View>
+        )}
+
+        {!weather && (
+          <Text style={styles.text}>Digite uma cidade para ver o clima.</Text>
+        )}
+
+        <StatusBar style="light" />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-
   container: {
     flex: 1,
-    backgroundColor: '#2196F3',
+    backgroundColor: '#00AFFF',
   },
-
   scroll: {
     paddingTop: 60,
-  },
-
-  cartao: {
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
-    borderRadius: 16,
-    width: '90%',
-    padding: 24,
-    marginVertical: 12,
     alignItems: 'center',
-    elevation: 0, // sombra Android
-    shadowColor: '#000', // sombra iOS
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2
   },
-
   input: {
-    alignSelf: 'flex-start',
-    width: 300,
-    height: 50,
-    marginBottom: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    width: '90%',
+    backgroundColor: 'rgba(255,255,255,0.2)',
     borderRadius: 12,
-    paddingHorizontal: 10,
+    marginBottom: 10,
   },
-
-  text: {
-    color: 'white',
-    fontSize: 16,
-    marginVertical: 4,
-  },
-
   button: {
-    backgroundColor: '#0D47A1',
+    backgroundColor: '#007ACC',
     borderRadius: 25,
-    height: 50,
-    width: 300,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 6,
-    elevation: 5,
   },
-
   buttonContainer: {
     width: '90%',
-    alignSelf: 'center',
-    marginBottom: 20,
-  }
+    marginBottom: 30,
+  },
+  weatherContainer: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  city: {
+    fontSize: 28,
+    color: '#fff',
+    fontWeight: '600',
+  },
+  temp: {
+    fontSize: 64,
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  desc: {
+    fontSize: 20,
+    color: '#fff',
+    marginBottom: 10,
+  },
+  infoBox: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '90%',
+    marginVertical: 16,
+  },
+  infoText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  card: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    borderRadius: 16,
+    padding: 16,
+    marginVertical: 10,
+    width: '90%',
+  },
+  sectionTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  cardText: {
+    color: '#fff',
+    fontSize: 16,
+    marginVertical: 2,
+  },
+  forecastItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 4,
+  },
+  day: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  text: {
+    color: '#fff',
+    fontSize: 16,
+    marginTop: 30,
+  },
 });
